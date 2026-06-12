@@ -102,7 +102,7 @@ class AIController extends Controller
                     basename($audioPath)
                 )
                 ->post(
-                    'https://apostle-encode-tiara.ngrok-free.dev/evaluate',
+                    'https://rawan7-nutqi-ai-service.hf.space/evaluate',
                     $data
                 );
 
