@@ -103,6 +103,7 @@ class SessionController extends Controller
                     return [
                         'id' => $audio->id,
                         'expected_text' => $audio->expected_text,
+                        'target_phoneme' => $audio->target_phoneme,
                         'recognized_text' => $audio->recognized_text,
                         'accuracy_score' => $audio->accuracy_score,
                         'ai_status' => $audio->ai_status,
@@ -182,6 +183,7 @@ class SessionController extends Controller
                     return [
                         'id' => $audio->id,
                         'expected_text' => $audio->expected_text,
+                        'target_phoneme' => $audio->target_phoneme,
                         'recognized_text' => $audio->recognized_text,
                         'accuracy_score' => $audio->accuracy_score,
                         'is_correct' => $audio->accuracy_score >= 70,
