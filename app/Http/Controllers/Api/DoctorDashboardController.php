@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
 use App\Models\Patient;
+use App\Models\Doctor;
 use App\Models\AudioRecord;
 use App\Models\AiFeedback;
 use Illuminate\Support\Carbon;
@@ -54,7 +55,7 @@ class DoctorDashboardController extends Controller
     }
 
     
-    //PATIENTS OVERVIEW 
+    // PATIENTS OVERVIEW
    
     public function patientsOverview($doctor_id)
     {
@@ -66,12 +67,6 @@ class DoctorDashboardController extends Controller
                 $lastSession = $patient->sessions
                     ->sortByDesc('created_at')
                     ->first();
-
-                $lastAudio = $lastSession
-                    ? $lastSession->audioRecords
-                        ->sortByDesc('created_at')
-                        ->first()
-                    : null;
 
                 return [
                     'patient_id' => $patient->id,
@@ -140,15 +135,27 @@ class DoctorDashboardController extends Controller
         ]);
     }
 
+    
+    // PATIENT SESSIONS
+    
     public function patientSessions($id)
     {
-        $doctor = auth()->user();
+        $user = auth()->user();
 
-        if (!$doctor || $doctor->role !== 'doctor') {
+        if (!$user || $user->role !== 'doctor') {
             return response()->json([
                 'status' => false,
                 'message' => 'Unauthorized'
             ], 403);
+        }
+
+        $doctor = Doctor::where('user_id', $user->id)->first();
+
+        if (!$doctor) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Doctor profile not found'
+            ], 404);
         }
 
         $patient = Patient::where('id', $id)
@@ -192,7 +199,7 @@ class DoctorDashboardController extends Controller
                             'recognized_text' => $audio->recognized_text,
                             'accuracy_score' => $audio->accuracy_score,
                             'is_correct' => $audio->accuracy_score >= 70,
-                            'file_url' => secure_url('storage/' . $audio->file_path), 
+                            'file_url' => secure_url('storage/' . $audio->file_path),
                             'created_at' => $audio->created_at->format('H:i'),
                         ];
                     }),
@@ -203,7 +210,7 @@ class DoctorDashboardController extends Controller
             'status' => true,
             'patient' => [
                 'id' => $patient->id,
-                'name' => $patient->name,
+                'name' => $patient->user->name ?? 'N/A',
                 'age' => $patient->age,
                 'speech_disorder' => $patient->speech_disorder,
             ],
@@ -212,7 +219,7 @@ class DoctorDashboardController extends Controller
     }
 
    
-    // FEEDBACK 
+    // FEEDBACK
     
     public function addFeedback(Request $request)
     {
